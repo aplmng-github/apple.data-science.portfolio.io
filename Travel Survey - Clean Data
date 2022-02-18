@@ -1,0 +1,107 @@
+import pandas as pd
+
+df = pd.read_excel('Data-to-be-Cleaned.xlsx', sheet_name='Data 1')
+
+df.info()
+
+## Respondents column
+
+df['Respondents'].unique()
+
+## Gender column
+
+df['Gender'].unique()
+
+# Clean Gender
+df['Gender'] = df['Gender'].astype('str')
+df['Gender'] = df['Gender'].apply(lambda x: x.title())
+
+df['Gender'].unique()
+
+## R_Group
+
+df['R_Group'].unique()
+
+df['R_Group'] = df['R_Group'].astype('str') # Convert to str
+df['R_Group'] = df['R_Group'].replace(',', ' ', regex=True) # Remove commas
+df['R_Group'] = df['R_Group'].replace('  ', ' ', regex=True) # Strip extra spaces
+df['R_Group'] = df['R_Group'].apply(lambda x: x.title()) # Standardize case
+
+# Extract the text from the string
+df['R_Group_Comment'] = df['R_Group'].str.extract('(The.+)', expand=True)
+# After extracting, remove
+df['R_Group'] = df['R_Group'].replace(' The Boathouse Sibuyan Island Phils.', '', regex=True)
+
+## HLEduc Column
+
+## Number People Column
+
+## Age Column
+
+## Tablas_Island, Sibuyan_Island, & Roblon_Island
+
+df[['Tablas_Island', 'Sibuyan_Island', 'Roblon_Island']] = df[['Tablas_Island', 
+                                                               'Sibuyan_Island', 'Roblon_Island']].replace(',',' ', regex=True) 
+
+## Long_Stay
+
+df['Long_Stay'] = df['Long_Stay'].astype('str')
+# Extract digit before comma
+df['Long_Stay1'] = df['Long_Stay'].str.extract('(^[\d])')
+
+df['Long_Stay (Years/Months)'] = df['Long_Stay'].str.extract('(?=,)(.*)')
+df['Long_Stay (Years/Months)'] = df['Long_Stay (Years/Months)'].astype('str') # To string
+df['Long_Stay (Years/Months)'] = df['Long_Stay (Years/Months)'].replace(',', '', regex=True) # Remove commas
+df['Long_Stay (Years/Months)'] = df['Long_Stay (Years/Months)'].apply(lambda v: v.strip())
+df['Long_Stay (Years/Months)'] = df['Long_Stay (Years/Months)'].apply(lambda v: v.capitalize())
+df['Long_Stay (Years/Months)'] = df['Long_Stay (Years/Months)'].replace('yrs', ' years', regex=True) # Replace yrs to year
+df['Long_Stay (Years/Months)'] = df['Long_Stay (Years/Months)'].apply(lambda v: v.capitalize()) # Add space to the years
+df['Long_Stay (Years/Months)'] = df['Long_Stay (Years/Months)'].replace('  ', ' ', regex=True)
+
+## Tourist
+
+## Characteristic
+
+df['Characteristic'] = df['Characteristic'].astype('str')
+df['Characteristic'] = df['Characteristic'].replace(',', ' ', regex=True) # Remove commas
+df['Characteristic_Comment'] = df['Characteristic'].str.extract('( \D+)') # Extract comments
+df['Characteristic_Comment'] = df['Characteristic_Comment'].astype('str')
+df['Characteristic_Comment'] = df['Characteristic_Comment'].apply(lambda x: x.strip())
+df['Characteristic_Comment'] = df['Characteristic_Comment'].apply(lambda x: x.title())
+                                                    
+
+## First Time
+
+df['First Time'] = df['First Time'].astype('str')
+df['First Time1'] = df['First Time'].str.extract('(^[\d])')
+df['First Time_Comment'] = df['First Time'].str.extract('( \D+)')
+df['First Time_Comment'] = df['First Time_Comment'].astype('str')
+df['First Time_Comment'] = df['First Time_Comment'].apply(lambda x: x.strip())
+df['First Time_Comment'] = df['First Time_Comment'].apply(lambda x: x.capitalize())
+
+for a in df['First Time_Comment']:
+    print(a)
+
+df.to_excel('Clean Data.xlsx', index=False)
+
+# Next Sheet
+
+df = pd.read_excel('Data-to-be-cleaned.xlsx', sheet_name='Data 2', header=None)
+
+df = df.rename(columns={0:'Full_Name'})
+
+for i in df['Full_Name']:
+    print(i)
+
+df['Middle_Initial'] = df['Full_Name'].str.extract('(?=\w+\.)(.*)')
+
+df['First_Name'] = df['Full_Name'].str.extract('(,.*)')
+df['First_Name'] = df['First_Name'].replace(', ', '', regex=True)
+df['First_Name'] = df['First_Name'].replace('\w\.+', '', regex=True) # Remove middle
+
+df['Last_Name'] = df['Full_Name'].str.extract('(\w*)(?=,)')
+
+df
+
+df.to_excel('Data 2.xlsx', index=False)
+
